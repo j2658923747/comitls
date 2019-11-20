@@ -13,7 +13,7 @@ public class money extends HttpServlet {
         String username = request.getParameter("username");
         String password = request.getParameter("password");
         response.setCharacterEncoding("gbk");
-        if(username==null){
+        if(username==null||password==null){
             response.getWriter().write("参数有误！");
             return;
         }
