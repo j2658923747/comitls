@@ -62,7 +62,7 @@ public class newUser {
         return res;
     }
 
-    public String mone(String username) {
+    public String mone(String username,String password) {
         Jedis jedis = JdeisUtils.getJedis();
         String res="";
         String lspass="";
@@ -73,13 +73,12 @@ public class newUser {
         long re = 0;
         JedisLock jedisLock = new JedisLock(jedis,"key");
         try {
+
+            lspass=login(username,password);
+
             jedisLock.acquire();
-            if(jedis.hexists("user",username)==false){
-                return "账号错误！";
-            }
-            lspass=jedis.hget("user",username);
-            if(lspass.equals("zhanghaoyifeng")){
-                res="账号已封禁！";
+            if(lspass.equals("登录成功！")==false){
+                res=lspass;
                 return res;
             }
             //判断账号上次得到金币时间
@@ -87,6 +86,7 @@ public class newUser {
                 //return "账号错误！";
                 jedis.hset("time",username, String.valueOf(System.currentTimeMillis()/1000));
                 jedis.hset("mone",username, "0.01");
+                res="金币增加成功!";
             }else{
                 //判断时间
                 lstime=jedis.hget("time",username);
@@ -103,7 +103,7 @@ public class newUser {
                         lsmo=lsmo+0.01;
                         jedis.hset("mone",username,String.format("%.2f",lsmo));
                     }
-                    res="成功!";
+                    res="金币增加成功!";
                     //增加完毕
                 }else{
                     //封号

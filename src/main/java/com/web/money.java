@@ -11,6 +11,7 @@ import java.io.IOException;
 public class money extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String username = request.getParameter("username");
+        String password = request.getParameter("password");
         response.setCharacterEncoding("gbk");
         if(username==null){
             response.getWriter().write("参数有误！");
@@ -20,9 +21,13 @@ public class money extends HttpServlet {
             response.getWriter().write("账号长度最少为8位！");
             return;
         }
+        if(password.length()<6){
+            response.getWriter().write("密码长度最少为6位！");
+            return;
+        }
 
         newUser nu = new newUser();
-        String res = nu.mone(username);
+        String res = nu.mone(username,password);
         if(res==null){
             res="错误！";
         }
