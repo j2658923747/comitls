@@ -84,7 +84,7 @@ public class newUser {
             jedisLock.acquire();
 
             Random random = new Random();
-            int cas = random.nextInt(10)+5;
+            int cas = random.nextInt(10)+10;
             //判断账号上次得到金币时间
             if(jedis.hexists("time",username)==false){
                 //return "账号错误！";
