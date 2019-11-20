@@ -5,6 +5,7 @@ import com.utils.JdeisUtils;
 import redis.clients.jedis.Jedis;
 
 import java.util.List;
+import java.util.Random;
 
 public class newUser {
 
@@ -82,11 +83,13 @@ public class newUser {
             }
             jedisLock.acquire();
 
+            Random random = new Random();
+            int cas = random.nextInt(10)+5;
             //判断账号上次得到金币时间
             if(jedis.hexists("time",username)==false){
                 //return "账号错误！";
                 jedis.hset("time",username, String.valueOf(System.currentTimeMillis()/1000));
-                jedis.hset("mone",username, "0.01");
+                jedis.hset("mone",username, String.valueOf(cas));
                 res="金币增加成功!";
             }else{
                 //判断时间
@@ -94,15 +97,15 @@ public class newUser {
                 lstime1=Long.parseLong(lstime);
                 lstime2=System.currentTimeMillis()/1000;
                 //System.out.println(lstime1+"----"+lstime2);
-                if(lstime2-lstime1>=420){//获取金币间隔
+                if(lstime2-lstime1>=60){//获取金币间隔
                     jedis.hset("time",username, String.valueOf(lstime2));
                     //增加金币
                     if(jedis.hexists("mone",username)==false){
-                        jedis.hset("mone",username, "0.01");
+                        jedis.hset("mone",username, String.valueOf(cas));
                     }else{
                         lsmo=Double.parseDouble(jedis.hget("mone",username));
-                        lsmo=lsmo+0.01;
-                        jedis.hset("mone",username,String.format("%.2f",lsmo));
+                        lsmo=lsmo+cas;
+                        jedis.hset("mone",username,String.format("%.0f",lsmo));
                     }
                     res="金币增加成功!";
                     //增加完毕
