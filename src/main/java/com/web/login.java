@@ -17,12 +17,12 @@ public class login extends HttpServlet {
             response.getWriter().write("参数有误！");
             return;
         }
-        if(username.length()<8){
-            response.getWriter().write("账号长度最少为8位！");
+        if(username.length()<6){
+            response.getWriter().write("账号长度最少为6位！");
             return;
         }
-        if(password.length()<6){
-            response.getWriter().write("密码长度最少为6位！");
+        if(password.length()<3){
+            response.getWriter().write("密码长度最少为3位！");
             return;
         }
         if(password.equals("zhanghaoyifeng")){

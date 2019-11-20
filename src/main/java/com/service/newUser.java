@@ -76,11 +76,12 @@ public class newUser {
 
             lspass=login(username,password);
 
-            jedisLock.acquire();
             if(lspass.equals("登录成功！")==false){
                 res=lspass;
                 return res;
             }
+            jedisLock.acquire();
+
             //判断账号上次得到金币时间
             if(jedis.hexists("time",username)==false){
                 //return "账号错误！";
@@ -174,10 +175,10 @@ public class newUser {
                 double lsmo=Double.parseDouble(lsmone)-Double.parseDouble(money);
                 jedis.hset("mone",username,String.format("%.2f",lsmo));
                 jedis.lpush("cash",username+"----"+name+"----"+account+"----"+money);
-                List<String> lscash = jedis.lrange("cash",0,-1);
+                /*List<String> lscash = jedis.lrange("cash",0,-1);
                 for (String s : lscash) {
                     System.out.println(s);
-                }
+                }*/
                 res="提现成功！";
             }catch (Exception e){
                 e.printStackTrace();
