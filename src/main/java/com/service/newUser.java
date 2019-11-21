@@ -10,10 +10,11 @@ import java.util.Random;
 public class newUser {
 
     public String create(String username, String password) {
+        System.out.println("开始新建！");
         Jedis jedis = JdeisUtils.getJedis();
         String res="";
         long re = 0;
-        JedisLock jedisLock = new JedisLock(jedis,"key");
+        JedisLock jedisLock = new JedisLock(jedis,"key",100,1000);
         try {
             jedisLock.acquire();
             re=jedis.hsetnx("user",username,password);
@@ -29,15 +30,17 @@ public class newUser {
         }else{
             res="注册成功！";
         }
+        System.out.println("新建结束！");
         return res;
     }
 
     public String login(String username, String password) {
+        System.out.println("开始登录！");
         Jedis jedis = JdeisUtils.getJedis();
         String res="";
         String lspass="";
         long re = 0;
-        JedisLock jedisLock = new JedisLock(jedis,"key");
+        JedisLock jedisLock = new JedisLock(jedis,"key",100,1000);
         try {
             jedisLock.acquire();
             if(jedis.hexists("user",username)==false){
@@ -55,6 +58,7 @@ public class newUser {
             }
         }
         if(res.equals("")==false){
+            System.out.println("登录结束！");
             return res;
         }
         if(lspass.equals(password)){
@@ -62,10 +66,13 @@ public class newUser {
         }else{
             res="密码错误！";
         }
+        System.out.println("登录结束！");
         return res;
+
     }
 
     public String mone(String username,String password) {
+        System.out.println("开始增加！");
         Jedis jedis = JdeisUtils.getJedis();
         String res="";
         String lspass="";
@@ -74,22 +81,22 @@ public class newUser {
         long lstime1,lstime2;
         double lsmo=0.0;
         long re = 0;
-        JedisLock jedisLock = new JedisLock(jedis,"key");
+        lspass=login(username,password);
+
+        if(lspass.equals("登录成功！")==false){
+            res=lspass;
+            System.out.println("增加结束！");
+            return res;
+        }
+        JedisLock jedisLock = new JedisLock(jedis,"key",100,1000);
         try {
 
-            lspass=login(username,password);
-
-            if(lspass.equals("登录成功！")==false){
-                res=lspass;
-                return res;
-            }
             jedisLock.acquire();
 
             Random random = new Random();
             int cas = random.nextInt(3)+10;
             //判断账号上次得到金币时间
             if(jedis.hexists("time",username)==false){
-                //return "账号错误！";
                 jedis.hset("time",username, String.valueOf(System.currentTimeMillis()/1000));
                 jedis.hset("mone",username, String.valueOf(cas));
                 res="金币增加成功!";
@@ -129,15 +136,17 @@ public class newUser {
         }else{
             res="密码错误！";
         }*/
+        System.out.println("增加结束！");
         return res;
     }
 
     public String look(String username) {
+        System.out.println("开始查看！");
         Jedis jedis = JdeisUtils.getJedis();
         String res="";
         String lspass="";
         long re = 0;
-        JedisLock jedisLock = new JedisLock(jedis,"key");
+        JedisLock jedisLock = new JedisLock(jedis,"key",100,1000);
         try {
             jedisLock.acquire();
             if(jedis.hexists("user",username)==false){
@@ -157,25 +166,28 @@ public class newUser {
                 jedisLock.release();
             }
         }
+        System.out.println("查看结束！");
         return res;
     }
 
     public String cash(String username, String password, String name, String account, String money) {
+        System.out.println("开始提现！");
         String res = login(username,password);
         if(res.equals("登录成功！")==false){
+            System.out.println("提现结束！");
             return "提现失败！";
         }else{
+            String lsmone=look(username);
+            if(lsmone.indexOf('!')!=-1){
+                return "提现失败！";
+            }
+            if(Double.parseDouble(lsmone)<Double.parseDouble(money)){
+                return "余额不足！";
+            }
             Jedis jedis = JdeisUtils.getJedis();
-            JedisLock jedisLock = new JedisLock(jedis,"key");
+            JedisLock jedisLock = new JedisLock(jedis,"key",100,1000);
             try {
                 //判断余额是否足够
-                String lsmone=look(username);
-                if(lsmone.indexOf('!')!=-1){
-                    return "提现失败！";
-                }
-                if(Double.parseDouble(lsmone)<Double.parseDouble(money)){
-                    return "余额不足！";
-                }
                 jedisLock.acquire();
                 double lsmo=Double.parseDouble(lsmone)-Double.parseDouble(money);
                 jedis.hset("mone",username,String.format("%.2f",lsmo));
@@ -192,6 +204,7 @@ public class newUser {
                     jedisLock.release();
                 }
             }
+            System.out.println("提现！");
             return res;
         }
     }
