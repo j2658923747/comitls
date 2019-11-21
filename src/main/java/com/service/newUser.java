@@ -41,12 +41,11 @@ public class newUser {
         try {
             jedisLock.acquire();
             if(jedis.hexists("user",username)==false){
-                return "账号错误！";
+                res="账号错误！";
             }
             lspass=jedis.hget("user",username);
             if(lspass.equals("zhanghaoyifeng")){
                 res="账号已封禁！";
-                return res;
             }
         }catch (Exception e){
             e.printStackTrace();
@@ -54,6 +53,9 @@ public class newUser {
             if (jedisLock!=null){
                 jedisLock.release();
             }
+        }
+        if(res.equals("")==false){
+            return res;
         }
         if(lspass.equals(password)){
             res="登录成功！";
@@ -84,7 +86,7 @@ public class newUser {
             jedisLock.acquire();
 
             Random random = new Random();
-            int cas = random.nextInt(10)+10;
+            int cas = random.nextInt(3)+10;
             //判断账号上次得到金币时间
             if(jedis.hexists("time",username)==false){
                 //return "账号错误！";
@@ -139,13 +141,13 @@ public class newUser {
         try {
             jedisLock.acquire();
             if(jedis.hexists("user",username)==false){
-                return "账号错误！";
+                res="账号错误！";
             }
             lspass=jedis.hget("user",username);
             if(lspass.equals("zhanghaoyifeng")){
                 res="账号已封禁！";
-                return res;
             }
+            if(res.equals(""))
             res=jedis.hget("mone",username);
             //System.out.println(res);
         }catch (Exception e){
