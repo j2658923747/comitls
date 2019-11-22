@@ -14,15 +14,18 @@ public class newUser {
         Jedis jedis = JdeisUtils.getJedis();
         String res="";
         long re = 0;
-        JedisLock jedisLock = new JedisLock(jedis,"key",100,1000);
+        //JedisLock jedisLock = new JedisLock(jedis,"key",100,1000);
         try {
-            jedisLock.acquire();
+          //  jedisLock.acquire();
             re=jedis.hsetnx("user",username,password);
         }catch (Exception e){
             e.printStackTrace();
         }finally {
-            if (jedisLock!=null){
-                jedisLock.release();
+//            if (jedisLock!=null){
+//                jedisLock.release();
+//            }
+            if (jedis!=null){
+                jedis.close();
             }
         }
         if(re==0){
@@ -40,21 +43,25 @@ public class newUser {
         String res="";
         String lspass="";
         long re = 0;
-        JedisLock jedisLock = new JedisLock(jedis,"key",100,1000);
+        //JedisLock jedisLock = new JedisLock(jedis,"key",100,1000);
         try {
-            jedisLock.acquire();
+            //jedisLock.acquire();
             if(jedis.hexists("user",username)==false){
                 res="账号错误！";
-            }
-            lspass=jedis.hget("user",username);
-            if(lspass.equals("zhanghaoyifeng")){
-                res="账号已封禁！";
+            }else{
+                lspass=jedis.hget("user",username);
+                if(lspass.equals("zhanghaoyifeng")){
+                    res="账号已封禁！";
+                }
             }
         }catch (Exception e){
             e.printStackTrace();
         }finally {
-            if (jedisLock!=null){
-                jedisLock.release();
+//            if (jedisLock!=null){
+//                jedisLock.release();
+//            }
+            if (jedis!=null){
+                jedis.close();
             }
         }
         if(res.equals("")==false){
@@ -88,10 +95,10 @@ public class newUser {
             System.out.println("增加结束！");
             return res;
         }
-        JedisLock jedisLock = new JedisLock(jedis,"key",100,1000);
+        //JedisLock jedisLock = new JedisLock(jedis,"key",100,1000);
         try {
 
-            jedisLock.acquire();
+            //jedisLock.acquire();
 
             Random random = new Random();
             int cas = random.nextInt(3)+10;
@@ -127,8 +134,11 @@ public class newUser {
         }catch (Exception e){
             e.printStackTrace();
         }finally {
-            if (jedisLock!=null){
-                jedisLock.release();
+//            if (jedisLock!=null){
+//                jedisLock.release();
+//            }
+            if (jedis!=null){
+                jedis.close();
             }
         }
         /*if(lspass.equals(lsmone)){
@@ -146,24 +156,28 @@ public class newUser {
         String res="";
         String lspass="";
         long re = 0;
-        JedisLock jedisLock = new JedisLock(jedis,"key",100,1000);
+        //JedisLock jedisLock = new JedisLock(jedis,"key",100,1000);
         try {
-            jedisLock.acquire();
+            //jedisLock.acquire();
             if(jedis.hexists("user",username)==false){
                 res="账号错误！";
+            }else{
+                lspass=jedis.hget("user",username);
+                if(lspass.equals("zhanghaoyifeng")){
+                    res="账号已封禁！";
+                }
+                if(res.equals(""))
+                    res=jedis.hget("mone",username);
             }
-            lspass=jedis.hget("user",username);
-            if(lspass.equals("zhanghaoyifeng")){
-                res="账号已封禁！";
-            }
-            if(res.equals(""))
-            res=jedis.hget("mone",username);
             //System.out.println(res);
         }catch (Exception e){
             e.printStackTrace();
         }finally {
-            if (jedisLock!=null){
-                jedisLock.release();
+//            if (jedisLock!=null){
+//                jedisLock.release();
+//            }
+            if (jedis!=null){
+                jedis.close();
             }
         }
         System.out.println("查看结束！");
@@ -185,23 +199,31 @@ public class newUser {
                 return "余额不足！";
             }
             Jedis jedis = JdeisUtils.getJedis();
-            JedisLock jedisLock = new JedisLock(jedis,"key",100,1000);
+            //JedisLock jedisLock = new JedisLock(jedis,"key",100,1000);
             try {
                 //判断余额是否足够
-                jedisLock.acquire();
+                //jedisLock.acquire();
                 double lsmo=Double.parseDouble(lsmone)-Double.parseDouble(money);
-                jedis.hset("mone",username,String.format("%.2f",lsmo));
-                jedis.lpush("cash",username+"----"+name+"----"+account+"----"+money);
+                long re=jedis.hsetnx("CASH",username,name+"----"+account+"----"+money);
+                if(re==0){
+                    res="请到账后提现！";
+                }else{
+                    jedis.hset("mone",username,String.format("%.2f",lsmo));
+                    res="提现成功！";
+                }
+                //jedis.lpush("cash",username+"----"+name+"----"+account+"----"+money);
                 /*List<String> lscash = jedis.lrange("cash",0,-1);
                 for (String s : lscash) {
                     System.out.println(s);
                 }*/
-                res="提现成功！";
             }catch (Exception e){
                 e.printStackTrace();
             }finally {
-                if (jedisLock!=null){
-                    jedisLock.release();
+//                if (jedisLock!=null){
+//                    jedisLock.release();
+//                }
+                if (jedis!=null){
+                    jedis.close();
                 }
             }
             System.out.println("提现！");
